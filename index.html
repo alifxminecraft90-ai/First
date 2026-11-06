@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#ffd23f">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Level Troll</title>
+<style>
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0;height:100%}
+body{background:#ffd23f;color:#111;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-tap-highlight-color:transparent}
+button,select{font:inherit;cursor:pointer}
+:focus-visible{outline:3px solid #fff;outline-offset:3px}
+#home{min-height:100%;display:flex;flex-direction:column}
+.top{flex:1;padding:max(28px,env(safe-area-inset-top)) 24px 24px;display:flex;flex-direction:column;justify-content:flex-end}
+h1{margin:0;font-size:clamp(64px,22vw,150px);line-height:.92;font-weight:900;letter-spacing:-.04em}
+.top p{margin:16px 0 0;font-size:19px;max-width:24ch;line-height:1.4;font-weight:500}
+.scene{position:relative;height:70px;margin-bottom:26px;max-width:420px}
+.scene i{position:absolute;bottom:6px;display:block}
+.man{width:16px;height:26px;background:#111;border-radius:3px;animation:walk 4.5s ease-in-out infinite}
+.man:before{content:"";position:absolute;left:-1px;top:-11px;width:18px;height:18px;border-radius:50%;background:#111}
+.door{width:30px;height:50px;background:#8b4513;border-radius:3px;animation:run 4.5s ease-in-out infinite}
+.gr{left:0;right:0;bottom:0!important;height:6px;background:#111}
+@keyframes walk{0%{left:0}55%,100%{left:46%}}
+@keyframes run{0%,50%{left:58%}60%,100%{left:88%}}
+@media (prefers-reduced-motion:reduce){.man,.door{animation:none}.man{left:20%}.door{left:70%}}
+.floor{background:#111;color:#ffd23f;padding:26px 24px calc(26px + env(safe-area-inset-bottom,0px));display:grid;gap:14px}
+.floor>*{width:100%;max-width:520px;justify-self:center}
+.pri{background:#ffd23f;color:#111;border:0;border-radius:16px;padding:19px;font-size:21px;font-weight:800}
+.pri:disabled{opacity:.6;cursor:default}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.row button{background:none;color:#ffd23f;border:2px solid #ffd23f;border-radius:14px;padding:14px;font-size:17px;font-weight:700}
+.row button.pri{background:#ffd23f;color:#111}
+progress{display:none;height:10px;accent-color:#ffd23f}
+progress.on{display:block}
+#st{margin:0;min-height:2.8em;font-size:15px;line-height:1.45}
+#set{position:fixed;inset:0;z-index:5;background:rgba(0,0,0,.6);display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:#1b1b1b;color:#f2f2f2;width:100%;max-width:520px;max-height:90%;overflow:auto;border-radius:22px 22px 0 0;padding:20px 20px calc(24px + env(safe-area-inset-bottom,0px))}
+.sheet header{display:flex;justify-content:space-between;align-items:center}
+.sheet h2{margin:0;font-size:26px}
+#sc{background:#ffd23f;color:#111;border:0;border-radius:12px;padding:10px 18px;font-weight:800}
+.sheet h3{margin:24px 0 4px;font-size:16px;color:#ffd23f}
+.r{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:13px 0;border-bottom:1px solid #333;font-size:16px}
+.r b{font-weight:600;color:#ffd23f;text-align:right;font-size:14px}
+.r select{background:#2a2a2a;color:#f2f2f2;border:1px solid #444;border-radius:10px;padding:8px 10px}
+.sw{appearance:none;-webkit-appearance:none;flex:none;width:48px;height:28px;border-radius:14px;background:#444;position:relative;margin:0;transition:background .15s}
+.sw:after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:left .15s}
+.sw:checked{background:#ffd23f}
+.sw:checked:after{left:23px;background:#111}
+.r button{flex:1;background:#2a2a2a;color:#f2f2f2;border:1px solid #444;border-radius:10px;padding:11px}
+.ab{margin:20px 0 0;font-size:13px;color:#999}
+#g{position:fixed;inset:0;background:#111;display:none;align-items:center;justify-content:center;touch-action:none;--cb:60px}
+body.play #g{display:flex}
+body.play #home{display:none}
+#c{background:#ffd23f;display:block}
+.cb{position:absolute;bottom:calc(8px + env(safe-area-inset-bottom,0px));width:var(--cb);height:var(--cb);border-radius:50%;border:3px solid #ffd23f;background:rgba(17,17,17,.6);color:#ffd23f;font-size:calc(var(--cb)*.42);touch-action:none;user-select:none;-webkit-user-select:none}
+#bl{left:calc(14px + env(safe-area-inset-left,0px))}
+#br{left:calc(26px + var(--cb) + env(safe-area-inset-left,0px))}
+#bj{right:calc(18px + env(safe-area-inset-right,0px))}
+#g.swap #bl{left:auto;right:calc(26px + var(--cb) + env(safe-area-inset-right,0px))}
+#g.swap #br{left:auto;right:calc(14px + env(safe-area-inset-right,0px))}
+#g.swap #bj{right:auto;left:calc(18px + env(safe-area-inset-left,0px))}
+#mn{position:absolute;top:calc(8px + env(safe-area-inset-top,0px));right:calc(10px + env(safe-area-inset-right,0px));background:rgba(17,17,17,.7);color:#ffd23f;border:2px solid #ffd23f;border-radius:12px;padding:8px 14px;font-weight:700}
+#rot{display:none;position:absolute;inset:0;background:#111;color:#ffd23f;align-items:center;justify-content:center;text-align:center;padding:24px;font-size:22px;font-weight:700}
+@media (orientation:portrait){body.play #rot{display:flex}}
+#sel{position:fixed;inset:0;z-index:4;background:#111;color:#f2f2f2;display:flex;flex-direction:column;overflow:auto}
+#sh{padding:max(20px,env(safe-area-inset-top)) 20px 22px;transition:background .3s}
+#sb{background:rgba(0,0,0,.2);color:inherit;border:0;border-radius:12px;padding:9px 16px;font-weight:700}
+#sn{margin:22px 0 4px;font-size:clamp(46px,14vw,84px);font-weight:900;letter-spacing:-.03em;line-height:1}
+#sc2{margin:0;font-weight:600;font-size:16px}
+#ch{display:flex;gap:8px;overflow-x:auto;padding:16px 20px 4px;flex:none}
+.chip{flex:none;background:#222;color:#ddd;border:2px solid #333;border-radius:20px;padding:9px 16px;font-weight:700}
+.chip.on{background:var(--c);color:#111;border-color:var(--c)}
+#tl{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;padding:16px 20px calc(24px + env(safe-area-inset-bottom,0px));max-width:560px;width:100%;margin:0 auto}
+.tile{aspect-ratio:1;background:#222;color:var(--c);border:2px solid var(--c);border-radius:16px;font-size:22px;font-weight:800}
+.tile.dn{background:var(--c);color:#111}
+.tile:disabled{opacity:.4;border-color:#333;color:#888;cursor:default}
+</style>
+</head>
+<body>
+<main id="home">
+  <div class="top">
+    <div class="scene" aria-hidden="true"><i class="man"></i><i class="door"></i><i class="gr"></i></div>
+    <h1>Level<br>Troll</h1>
+    <p>Five stages. Fifty levels. Every one is a trap.</p>
+  </div>
+  <div class="floor">
+    <button id="dl" class="pri">Download app · 100 MB</button>
+    <progress id="bar" max="100" value="0"></progress>
+    <p id="st" role="status"></p>
+    <div class="row"><button id="pl">Play</button><button id="so">Settings</button></div>
+  </div>
+</main>
+<div id="sel" hidden><div id="sh"><button id="sb">Back</button><h2 id="sn"></h2><p id="sc2"></p></div><div id="ch"></div><div id="tl"></div></div>
+<div id="set" hidden>
+  <div class="sheet" role="dialog" aria-label="Settings">
+    <header><h2>Settings</h2><button id="sc">Done</button></header>
+    <h3>Download and network</h3>
+    <div class="r"><span>Connection</span><b id="net"></b></div>
+    <label class="r"><span>Download on Wi-Fi only</span><input class="sw" type="checkbox" data-k="wifi"></label>
+    <label class="r"><span>Download speed</span><select data-k="streams"><option value="5">Fast (5 streams)</option><option value="3">Balanced (3 streams)</option><option value="1">Data saver (1 stream)</option></select></label>
+    <h3>Game</h3>
+    <label class="r"><span>Sound effects</span><input class="sw" type="checkbox" data-k="sound"></label>
+    <label class="r"><span>Vibration on death</span><input class="sw" type="checkbox" data-k="vib"></label>
+    <label class="r"><span>Button size</span><select data-k="size"><option value="52">Small</option><option value="60">Medium</option><option value="72">Large</option></select></label>
+    <label class="r"><span>Swap button sides</span><input class="sw" type="checkbox" data-k="swap"></label>
+    <h3>Storage</h3>
+    <div class="r"><span>Game data</span><b id="gd"></b></div>
+    <div class="r"><span>Storage used</span><b id="us"></b></div>
+    <div class="r"><button id="del">Delete game data</button><button id="rs">Reset progress</button></div>
+    <p class="ab">Level Troll 1.2</p>
+  </div>
+</div>
+<section id="g">
+  <canvas id="c" width="800" height="450"></canvas>
+  <button class="cb" id="bl" aria-label="Move left">◀</button>
+  <button class="cb" id="br" aria-label="Move right">▶</button>
+  <button class="cb" id="bj" aria-label="Jump">▲</button>
+  <button id="mn">Menu</button>
+  <div id="rot">Rotate your phone to landscape</div>
+</section>
+<script src="game.js"></script>
+<script>
+const $=id=>document.getElementById(id),N=5,SZ=20*1048576,K='lt_s',cn=navigator.connection;
+const bar=$('bar'),st=$('st'),dl=$('dl');
+let S={wifi:0,streams:5,sound:1,vib:1,size:60,swap:0},dp=null,have=false;
+try{Object.assign(S,JSON.parse(localStorage.getItem(K)||'{}'))}catch(e){}
+const standalone=matchMedia('(display-mode: standalone)').matches||matchMedia('(display-mode: fullscreen)').matches||navigator.standalone;
+function apply(){$('g').style.setProperty('--cb',S.size+'px');$('g').classList.toggle('swap',!!S.swap)}
+document.querySelectorAll('[data-k]').forEach(e=>{
+  const k=e.dataset.k;if(e.type==='checkbox')e.checked=!!S[k];else e.value=S[k];
+  e.onchange=()=>{S[k]=e.type==='checkbox'?+e.checked:+e.value;try{localStorage.setItem(K,JSON.stringify(S))}catch(x){}apply()};
+});
+apply();
+function net(){const t=[navigator.onLine?'Online':'Offline'];if(cn){if(cn.type)t.push(cn.type==='wifi'?'Wi-Fi':cn.type);if(cn.effectiveType)t.push(cn.effectiveType.toUpperCase());if(cn.downlink)t.push('about '+cn.downlink+' Mbps')}$('net').textContent=t.join(', ')}
+net();addEventListener('online',net);addEventListener('offline',net);if(cn)cn.addEventListener('change',net);
+async function chk(){
+  try{have=window.caches&&(await (await caches.open('pack-v1')).keys()).length>=N}catch(e){have=false}
+  $('gd').textContent=have?'Downloaded (100 MB)':'Not downloaded';use();
+  if(!standalone){dl.textContent=have?'Install app':'Download app · 100 MB'}
+}
+chk();
+const fmt=n=>n<1048576?Math.round(n/1024)+' KB':(n/1048576).toFixed(1)+' MB';
+async function use(){try{$('us').textContent=fmt((await navigator.storage.estimate()).usage||0)}catch(x){$('us').textContent='n/a'}}
+let cs=0;
+function rsel(){
+  const A=startGame.ST,T=A[cs],u=startGame.prog(),h=$('sh');
+  h.style.background='linear-gradient('+T.a+','+T.b+')';h.style.color=T.dk?'#fff':'#111';
+  $('sn').textContent=T.n;$('sc2').textContent=Math.max(0,Math.min(10,u-cs*10))+' of 10 levels cleared';
+  $('ch').innerHTML=A.map((t,i)=>'<button class="chip'+(i==cs?' on':'')+'" data-s="'+i+'" style="--c:'+t.t+'">'+t.n+'</button>').join('');
+  $('tl').style.setProperty('--c',T.t);
+  $('tl').innerHTML=Array.from({length:10},(_,j)=>{const i=cs*10+j;return '<button class="tile'+(i<u?' dn':'')+'" data-i="'+i+'"'+(i>u?' disabled':'')+'>'+(i>u?'–':j+1)+'</button>'}).join('');
+}
+function play(){cs=Math.min(4,startGame.prog()/10|0);$('sel').hidden=false;rsel()}
+$('sel').onclick=e=>{const b=e.target.closest('button');if(!b)return;
+  if(b.id==='sb')$('sel').hidden=true;
+  else if(b.dataset.s!=null){cs=+b.dataset.s;rsel()}
+  else if(b.dataset.i!=null){$('sel').hidden=true;document.body.classList.add('play');startGame.paused=false;startGame(+b.dataset.i)}};
+function menu(){startGame.paused=true;document.body.classList.remove('play')}
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+addEventListener('beforeinstallprompt',e=>{e.preventDefault();dp=e});
+addEventListener('appinstalled',()=>{st.textContent='Installed. Look for Level Troll on your home screen.'});
+if(standalone){dl.hidden=true;$('pl').classList.add('pri')}
+$('pl').onclick=play;$('mn').onclick=menu;
+$('so').onclick=()=>{$('set').hidden=false;net();chk()};$('sc').onclick=()=>{$('set').hidden=true};
+$('del').onclick=async()=>{await caches.delete('pack-v1');have=false;chk();bar.classList.remove('on');st.textContent='Game data deleted.'};
+$('rs').onclick=()=>{startGame.reset();$('rs').textContent='Progress reset';setTimeout(()=>$('rs').textContent='Reset progress',1500)};
+async function pull(){
+  const c=await caches.open('pack-v1'),t0=performance.now();let done=0;
+  const add=n=>{done+=n;bar.value=done/(N*SZ)*100;st.textContent=fmt(done)+' of 100 MB at '+fmt(done/Math.max(.2,(performance.now()-t0)/1000))+'/s'};
+  const q=[...Array(N).keys()];
+  const one=async()=>{for(let i;(i=q.shift())!==undefined;){
+    const u='data/pack'+i+'.txt';
+    if(await c.match(u)){add(SZ);continue}
+    const r=await fetch(u);if(!r.ok)throw new Error('HTTP '+r.status);
+    const rd=r.body.getReader();
+    await c.put(u,new Response(new ReadableStream({async pull(ct){const o=await rd.read();if(o.done)ct.close();else{add(o.value.length);ct.enqueue(o.value)}}}),{headers:{'content-type':'text/plain'}}));
+  }};
+  await Promise.all(Array.from({length:Math.min(S.streams,N)},one));
+}
+dl.onclick=async()=>{
+  if(dp){dp.prompt();dp=null}
+  if(!window.caches){st.textContent='Downloads need a secure (HTTPS) link, like your Netlify site.';return}
+  if(S.wifi&&cn&&cn.type==='cellular'){st.textContent='Wi-Fi only is on. Connect to Wi-Fi or turn it off in Settings.';return}
+  if(have){st.textContent=/iphone|ipad/i.test(navigator.userAgent)?'In Safari, tap Share, then Add to Home Screen.':'If no install box appeared, open the browser menu and tap Install app or Add to Home screen.';return}
+  dl.disabled=true;bar.classList.add('on');
+  try{await pull();await chk();st.textContent='Download complete. Tap Install app to finish.'}
+  catch(e){st.textContent='Download failed ('+e.message+'). Check your connection and try again.'}
+  dl.disabled=false;
+};
+</script>
+</body>
+</html>
